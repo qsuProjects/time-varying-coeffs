@@ -1,4 +1,8 @@
-# scp ~/shexport/PCORI/generateByScenario.R kikapp@sherlock:~/PCORI/lib
+##### push files to Sherlock #####
+system( paste('scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/r mmathur@sherlock:/share/PI/manishad/tvc/genSurv') )
+##############################
+
+
 args <- commandArgs(trailingOnly = T)
 print(args)
 
