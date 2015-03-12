@@ -1,0 +1,45 @@
+
+##define beta
+betas <- data.frame(male = 0.15,
+                    d_abac = 0.7, 
+                    d_ataz = 0.5,
+                    d_dida = 0.3,
+                    d_efav = 0,
+                    d_emtr = 0,
+                    #                     d_indi = 0,
+                    d_lami = 0.5,
+                    d_lopi = 0,
+                    d_nelf = 0,
+                    #                     d_nevi = 0,
+                    d_rito = 0,
+                    #                     d_saqu = 0,
+                    d_stav = 0,
+                    d_teno = 0,
+                    d_zido = 0,
+                    age = 0.02,
+                    
+                    # bmi = 0.05,
+                    ind_bmi_lt_20	= 0.39,
+                    ind_bmi_25_30	= 0.02,
+                    ind_bmi_gt_30	= -0.03,
+                    
+                    # log_cd4 = 0.09,
+                    # ind_cd4_lt_50	0.479219
+                    ind_cd4_50_100 =0.15,
+                    ind_cd4_100_200	= -0.06,
+                    ind_cd4_200_350	= 0.03,
+                    ind_cd4_350_500 =	-0.06,
+                    # log_vln = 0.09,
+                    log_vln_2 = 0.1,
+                    log_vln_3 = 0.1,
+                    log_vln_4 = 0.1,
+                    log_vln_5 = 0.1,
+                    
+                    bps = 0.005,
+                    bpd = 0.005,
+                    ldl = 0.005,
+                    hdl = 0.002,
+                    trig = 0.0002,
+                    race_black = -0.2,
+                    race_other = 0
+)
