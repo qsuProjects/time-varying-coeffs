@@ -43,6 +43,8 @@ registerDoSNOW(cl)
 number_cores
 getDoParWorkers()
 
+print("About to make clusters")
+
 clusterApply(cl, seq(along=cl), function(.id, .results_write_directory, .log_write_directory, .sim_results_name, .segment_index) {
   set.seed(.segment_index*(2^.id))
   
@@ -64,6 +66,9 @@ clusterApply(cl, seq(along=cl), function(.id, .results_write_directory, .log_wri
   cat("coef,se,p,var,type,proportion_censored,rep\n", file = MODEL.OUTPUT.FILE.PATH, append = F)
   
 }, results_write_directory, log_write_directory, sim_results_name, segment_index)
+
+
+print("About to enter main simulation loop")
 
 
 ##main simulation loop
@@ -334,6 +339,7 @@ l_ply(range_low:range_high, .parallel = T, function(.rep, .covariate_data_path, 
     names(.pooled_poisson_results) <- c("coef", "se", "p")
     .pooled_poisson_results$var <- row.names(.pooled_poisson_results)
     .pooled_poisson_results$type <- "Pooled Poisson"
+  
     
     .uncensored_results[[3]] <- .pooled_poisson_results
     

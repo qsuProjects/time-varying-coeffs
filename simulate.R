@@ -7,7 +7,7 @@
 # max.t: maximum observation time (will truncate later)
 # seed: seed value for simulation
 
-simulate_Xs = function(n, doses, doses.p, max.t, seed=NA) {
+simulate_Xs = function(n, doses, doses.p, max.t, seed=NA, write.path=NA) {
   
   # initialize dataframe
   d = data.frame(matrix(ncol = 5, nrow = n*max.t))
@@ -25,8 +25,12 @@ simulate_Xs = function(n, doses, doses.p, max.t, seed=NA) {
   # compute current dose (interaction variable)
   d$dose.X.t = d$start.dose * d$t
   
+  # write file
+  if (!is.na(write.path)) write.csv(d, paste(Sys.Date(), "dataset.csv", sep="_"))
   return(d)
 }
+
+
 
 # TEST - works :)
 n = 1000
@@ -34,10 +38,9 @@ doses = c(1, 2, 3)
 doses.p = rep( 1/length(doses), length(doses) )
 max.t = 20
 seed = 1
-d = simulate_Xs( n, doses, doses.p, max.t, seed )
+write.path = "/Users/mmathur/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for-sherlock"
 
-
-
+d = simulate_Xs( n, doses, doses.p, max.t, seed, write.path )
 
 
 

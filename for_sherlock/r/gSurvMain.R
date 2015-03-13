@@ -1,21 +1,23 @@
 ##### push files to Sherlock #####
 # system( paste('scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/* mmathur@sherlock:/share/PI/manishad/tvc/genSurv') )
 # 
+# run first sbatch file
+# system("sbatch /share/PI/manishad/tvc/genSurv/r/0001_genSurv.sbatch -p manishad")
 ##############################
 
 args <- commandArgs(trailingOnly = T)
 print(args)
 
-source_location <- args[1]
-beta_location <- args[2]
-covariate_data_path <- args[3]
-number_cores <- as.numeric(args[4])
-n_segments <- as.numeric(args[5])
-segment_index <- as.numeric(args[6])
-results_write_directory <- args[7]
-sim_results_name <- args[8]
-log_write_directory <- args[9]
-data_write_directory <- args[10]
+( source_location <- args[1] )
+( beta_location <- args[2] )
+( covariate_data_path <- args[3] )
+( number_cores <- as.numeric(args[4]) )
+( n_segments <- as.numeric(args[5]) )
+( segment_index <- as.numeric(args[6]) )
+( results_write_directory <- args[7] )
+( sim_results_name <- args[8] )
+( log_write_directory <- args[9] )
+( data_write_directory <- args[10] )
 
 
 #load betas
