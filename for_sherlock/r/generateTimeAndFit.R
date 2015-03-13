@@ -118,61 +118,6 @@ l_ply(range_low:range_high, .parallel = T, function(.rep, .covariate_data_path, 
   
   #find number of observations per person
   .n_observations_per <- unique(table(.covariates$id))
-  
-  ### process covariates ####
-  
-  #viral load
-  #split into quintiles
-  .covariates$log_vln_quint <- cut(.covariates$log_vln, 
-                                   breaks = quantile(.covariates$log_vln, seq(from = 0, to = 1, by = 0.2)),
-                                   labels = c("first", "second", "third", "fourth", "fifth"))
-  .covariates$log_vln_2 <- .covariates$log_vln_3 <- .covariates$log_vln_4 <- .covariates$log_vln_5 <- 0
-  .covariates$log_vln_2[.covariates$log_vln_quint == "second"] <- 1
-  .covariates$log_vln_3[.covariates$log_vln_quint == "third"] <- 1
-  .covariates$log_vln_4[.covariates$log_vln_quint == "fourth"] <- 1
-  .covariates$log_vln_5[.covariates$log_vln_quint == "fifth"] <- 1
-  
-  #cd4
-  #use cutpoints from paper
-  .covariates$cd4_cuts <- cut(.covariates$cd4, 
-                              breaks = c(-1e6, 50, 100, 200, 350, 1e6),
-                              labels = c("lt_50", "50_100", "100_200", "200_350", "350+"))
-  .covariates$ind_cd4_50_100 <- 
-    .covariates$ind_cd4_100_200 <-
-    .covariates$ind_cd4_200_350 <- 
-    .covariates$ind_cd4_350_500 <- 0
-  
-  .covariates$ind_cd4_50_100[.covariates$cd4_cuts == "50_100"] <- 1
-  .covariates$ind_cd4_100_200[.covariates$cd4_cuts == "100_200"] <- 1
-  .covariates$ind_cd4_200_350[.covariates$cd4_cuts == "200_350"] <- 1
-  .covariates$ind_cd4_350_500[.covariates$cd4_cuts == "350+"] <- 1
-  
-  #bmi
-  #use cutpoints from paper
-  
-  #use cutpoints from paper
-  .covariates$bmi_cuts <- cut(.covariates$bmi, 
-                              breaks = c(-1e6, 20, 25, 30, 1e6),
-                              labels = c("lt_20", "20_25", "25_30", "gt30"))
-  .covariates$ind_bmi_lt_20 <- 
-    .covariates$ind_bmi_25_30 <-
-    .covariates$ind_bmi_gt_30 <- 0
-  
-  .covariates$ind_bmi_lt_20[.covariates$bmi_cuts == "lt_20"] <- 1
-  .covariates$ind_bmi_25_30[.covariates$bmi_cuts == "25_30"] <- 1
-  .covariates$ind_bmi_gt_30[.covariates$bmi_cuts == "gt30"] <- 1
-  
-  #generate dummy variables for race
-  .covariates$race_black <- 0
-  .covariates$race_other <- 0
-  
-  .covariates$race_black[.covariates$racecatexp == 1] <- 1
-  .covariates$race_other[.covariates$racecatexp == 2] <- 1
-  
-  #make age constant for each subject
-  .covariates <- ddply(.covariates, .(id), function(.df) {
-    .df$age <- .df$age[1]
-    return(.df)
   })
   
   #determine how many subjects are in the data
