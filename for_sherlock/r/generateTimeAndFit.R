@@ -118,7 +118,6 @@ l_ply(range_low:range_high, .parallel = T, function(.rep, .covariate_data_path, 
   
   #find number of observations per person
   .n_observations_per <- unique(table(.covariates$id))
-  })
   
   #determine how many subjects are in the data
   .n_subjects <- length(unique(.covariates$id))
