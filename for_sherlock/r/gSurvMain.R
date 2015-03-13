@@ -1,10 +1,7 @@
 ##### push files to Sherlock #####
-system( paste('scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock mmathur@sherlock:/share/PI/manishad/tvc/genSurv') )
+# system( paste('scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/* mmathur@sherlock:/share/PI/manishad/tvc/genSurv') )
+# 
 ##############################
-
-# testinggggg #
-
-
 
 args <- commandArgs(trailingOnly = T)
 print(args)
