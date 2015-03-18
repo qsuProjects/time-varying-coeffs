@@ -2,10 +2,9 @@
 # system( paste('scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/* mmathur@sherlock:/share/PI/manishad/tvc/genSurv') )
 # 
 # run first sbatch file
-# sbatch /share/PI/manishad/tvc/genSurv/sbatch/0001_genSurv.sbatch -p manishad
-#
-# look at log
-# cd /scratch/PI/manishad/tvc/genSurv/output/log
+system("ssh sherlock")
+system("sbatch /share/PI/manishad/tvc/genSurv/sbatch/0001_genSurv.sbatch -p manishad")
+# TEST 4:10
 ##############################
 
 args <- commandArgs(trailingOnly = T)
@@ -45,8 +44,6 @@ cat(range_high, "\n")
 
 #initialize seed
 the_seed <- segment_index
-
-
 
 source(source_location)
 
