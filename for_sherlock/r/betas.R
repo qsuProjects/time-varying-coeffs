@@ -1,5 +1,4 @@
-
 ##define beta
-betas <- data.frame(start.dose = 0.15,
-                    dose.X.t = 0.7
+betas <- data.frame(start.dose = 10,
+                    dose.X.t = 20
 )

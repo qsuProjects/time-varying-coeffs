@@ -2,9 +2,8 @@
 # system( paste('scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/* mmathur@sherlock:/share/PI/manishad/tvc/genSurv') )
 # 
 # run first sbatch file
-system("ssh sherlock")
-system("sbatch /share/PI/manishad/tvc/genSurv/sbatch/0001_genSurv.sbatch -p manishad")
-# TEST 4:10
+#system("ssh sherlock")
+#system("sbatch /share/PI/manishad/tvc/genSurv/sbatch/0001_genSurv.sbatch -p manishad")
 ##############################
 
 args <- commandArgs(trailingOnly = T)
