@@ -39,12 +39,11 @@
 ml load R
 
 # arg 1: n
-# arg 2: doses vector
-# arg 3: dose probability vector
-# arg 4: maximum observation time (will truncate later)
-# arg 5: seed
-# arg 6: name prefix
-# arg 7: write path
+# arg 2: path for dose parameter csv file
+# arg 3: maximum observation time (will truncate later)
+# arg 4: seed
+# arg 5: name prefix
+# arg 6: write path
 
-srun R -f /share/PI/manishad/tvc/genCov/r/simulate.R --args 1000 "c(1, 2, 3)" "rep( 1/length(doses), length(doses) )" 20 1 job_1 /share/PI/manishad/tvc/genCov/output/generated_data 
+srun R -f /share/PI/manishad/tvc/genCov/r/simulate.R --args 1000 /share/PI/manishad/tvc/genCov/dose_parameters.csv 20 1 job_1 /share/PI/manishad/tvc/genCov/output/generated_data 
 

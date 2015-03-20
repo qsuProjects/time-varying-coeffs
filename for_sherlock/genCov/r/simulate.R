@@ -7,13 +7,18 @@ print(args)
 
 # see below (function defintion) for meaning of each
 n = as.numeric(args[1])
-doses = eval(parse(text=args[2])); length(doses)
-doses.p  = eval(parse(text=args[3]))
-max.t = as.numeric(args[4])
-seed = as.numeric(args[5])
-name.prefix = args[6]
-write.path = args[7]
+dose.param.path = args[2]
+max.t = as.numeric(args[3])
+seed = as.numeric(args[4])
+name.prefix = args[5]
+write.path = args[6]
 
+
+########################### READ IN DOSE PARAMETERS ########################### 
+
+dose.params = read.csv(dose.param.path, head=TRUE); print(dose.params)
+doses = dose.params$dose
+doses.p = dose.params$doses.p
 
 ########################### FUNCTION: SIMULATE COVARIATES ########################### 
 
