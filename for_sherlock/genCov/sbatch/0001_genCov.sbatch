@@ -3,16 +3,16 @@
 #set partition 
 #SBATCH -p manishad
 #set a job name  
-#SBATCH --job-name=gs0001
+#SBATCH --job-name=gc0001
 #################  
 #a file for job output, you can check job progress
-#SBATCH --output=ogs0001.out
+#SBATCH --output=ogc0001.out
 #################
 # a file for errors from the job
-#SBATCH --error=egs0001.err
+#SBATCH --error=egc0001.err
 #################
 #time you think you need; default is one hour
-#SBATCH --time=1:00:00
+#SBATCH --time=0:07:00
 #################
 #quality of service; think of it as job priority
 #SBATCH --qos=normal
@@ -38,15 +38,13 @@
 
 ml load R
 
--- arg 1: source location
--- arg 2: beta location
--- arg 3: covariate data path
--- arg 4: number cores
--- arg 5: number segments
--- arg 6: segment index
--- arg 7: results write directory
--- arg 8: sim results name
--- arg 9: log write directory
--- arg 10: data write directory
+# arg 1: n
+# arg 2: doses vector
+# arg 3: dose probability vector
+# arg 4: maximum observation time (will truncate later)
+# arg 5: seed
+# arg 6: name prefix
+# arg 7: write path
 
-srun R -f /share/PI/manishad/tvc/genSurv/r/gSurvMain.R --args  /share/PI/manishad/tvc/genSurv/r/generateTimeAndFit.R /share/PI/manishad/tvc/genSurv/r/betas.R /share/PI/manishad/tvc/genSurv/data 8 50 1 /scratch/PI/manishad/tvc/genSurv/output/modelFit survtime.csv /scratch/PI/manishad/tvc/genSurv/output/log/ /scratch/PI/manishad/tvc/genSurv/output/covariates/
+srun R -f /share/PI/manishad/tvc/genCov/r/simulate.R --args 1000 "c(1, 2, 3)" "rep( 1/length(doses), length(doses) )" 20 1 job_1 /share/PI/manishad/tvc/genCov/output/generated_data 
+
