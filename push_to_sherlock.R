@@ -3,7 +3,7 @@
 system( "scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/* mmathur@sherlock:/share/PI/manishad/tvc" )
 
 # run them
-# sbatch /share/PI/manishad/tvc/genCov/sbatch/0001_genCov.sbatch -p manishad
+# sbatch /share/PI/manishad/tvc/genCov/sbatch/1.sbatch -p manishad
 # sbatch /share/PI/manishad/tvc/genSurv/sbatch/0001_genSurv.sbatch -p manisha
 
 # look at genCov results
