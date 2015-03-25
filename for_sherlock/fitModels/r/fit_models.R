@@ -51,38 +51,6 @@ collapse_data = function(data, id.var.name="id", event.var.name="d") {
 }
 
 
-
-################### OBSOLETE??
-########################### FUNCTION: INITIALIZE RESULTS FILE ###########################
-
-# create a file to store results
-# rows = 2 * number of datasets generated (1 row for right model, 1 for wrong)
-# prepopulate a column for model type (right vs. wrong)
-
-# columns:
-#  dataset name (prepopulated to avoid overwriting)
-#  model type (right vs. wrong)
-#  bias
-#  MSE
-#  coverage (0/1)
-
-# arguments:
-#  results.write.path
-#  n.datasets: number of datasets that were generated
-
-init_results = function(.dataset.names, .model.type) {
-  
-  r = as.data.frame( matrix(nrow=length(.dataset.names), ncol=6) )
-  names(r) = c("dataset.name", "date", "model.type", "bias", "mse", "coverage")
-  
-  r$dataset.name = .dataset.names
-  r$date = Sys.Date()
-  r$model.type = .model.type
-  
-  return(r)
-}
-
-
 ########################### FUNCTION: FIT MODEL ###########################
 
 # given a dataset, fit the specified model (right or wrong) and write results to a single csv file
@@ -96,7 +64,10 @@ init_results = function(.dataset.names, .model.type) {
 fit_one_model = function( .dataset.path, .type, .right.model.form.path, .wrong.model.form.path, .results.write.path, .name.prefix ) {
   
   # read in dataset
-  data = read.csv(.dataset.path)
+  # if fitting right model, assume the dataset path is already the split data that we're going to use
+  # if fitting wrong model, assume the dataset path is the true data that must first be collapsed
+  data = switch( .type, "right"=read.csv(.dataset.path),
+                 "wrong"=collapse_data( read.csv(.dataset.path), id.var.name="id", event.var.name="d" ) )
   
   # based on the arguments, read in the Cox formula
   formula = readLines( switch( .type, "right"=.right.model.form.path, "wrong"=.wrong.model.form.path ) )
@@ -124,13 +95,22 @@ fit_one_model = function( .dataset.path, .type, .right.model.form.path, .wrong.m
 
 
 # LOCAL TEST - WORKS :)
-#.dataset.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/collapsed_data.csv"
-#.type = "wrong"
-#.right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
-#.wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
-#.results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/results"
+.dataset.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/SURV_2015-03-12_dataset.csv"
+.type = "wrong"
+.right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
+.wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
+.results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/results"
+.name.prefix = "test_row.csv"
 
+.dataset.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/split_data.csv"
+.type = "right"
+.right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
+.wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
+.results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/results"
+.name.prefix = "test_row.csv"
 
+fit_one_model( .dataset.path, .type, .right.model.form.path, .wrong.model.form.path,
+                          .results.write.path, .name.prefix )
 
 
 
