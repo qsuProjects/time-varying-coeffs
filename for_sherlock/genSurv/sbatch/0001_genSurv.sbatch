@@ -12,7 +12,7 @@
 #SBATCH --error=egs0001.err
 #################
 #time you think you need; default is one hour
-#SBATCH --time=1:00:00
+#SBATCH --time=00:10:00
 #################
 #quality of service; think of it as job priority
 #SBATCH --qos=normal
@@ -38,15 +38,17 @@
 
 ml load R
 
--- arg 1: source location
--- arg 2: beta location
--- arg 3: covariate data path
--- arg 4: number cores
--- arg 5: number segments
--- arg 6: segment index
--- arg 7: results write directory
--- arg 8: sim results name
--- arg 9: log write directory
--- arg 10: data write directory
+# arg 1: source location
+# arg 2: beta location
+# arg 3: covariate data path
+# arg 4: number cores
+# arg 5: number segments
+# arg 6: segment index
+# arg 7: results write directory
+# arg 8: sim results name
+# arg 9: log write directory
+# arg 10: data write directory
 
-srun R -f /share/PI/manishad/tvc/genSurv/r/gSurvMain.R --args  /share/PI/manishad/tvc/genSurv/r/generateTimeAndFit.R /share/PI/manishad/tvc/genSurv/r/betas.R /share/PI/manishad/tvc/genSurv/input_data 8 50 1 /scratch/PI/manishad/tvc/genSurv/output/modelFit survtime.csv /share/PI/manishad/tvc/genSurv/output/log/ /share/PI/manishad/tvc/genSurv/output/generated_data/
+srun R -f /share/PI/manishad/tvc/genSurv/r/gSurvMain.R --args /share/PI/manishad/tvc/genSurv/r/generateTimeAndFit.R /share/PI/manishad/tvc/genSurv/r/betas.R /share/PI/manishad/tvc/genSurv/input_data 8 50 1 /scratch/PI/manishad/tvc/genSurv/output/modelFit survtime.csv /share/PI/manishad/tvc/genSurv/output/log/ /share/PI/manishad/tvc/genSurv/output/generated_data/
+
+
