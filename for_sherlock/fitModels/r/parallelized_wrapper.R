@@ -2,22 +2,25 @@
 ########################### LOAD COMMAND-LINE ARGUMENTS ###########################
 
 # load command line arguments
-#args = commandArgs(trailingOnly = TRUE)
-#print(args)
+args = commandArgs(trailingOnly = TRUE)
+print(args)
 
-# EDIT THIS :)
 # see below (function definition) for meaning of each
 n.clusters = as.numeric(args[1])
-model.type = args[2]
-data.path = args[3]  # path to folder with all datasets
-results.write.path = args[4]
-functions.path = args[5]
+type = args[2]
+
+right.model.form.path = args[3]
+wrong.model.form.path = args[4]
+results.write.path = args[5]
+functions.path = args[6]
+
+data.path = args[7]  # path to folder with all datasets
+
 
 
 ############# LOCAL TEST
 n.clusters=2
 functions.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/fitModels/r/fit_models.R"
-
 type="right"
 right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
 wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
@@ -55,8 +58,7 @@ getDoParWorkers()
 #files
 #clusterApply(cl, seq(along=cl), function(id) WORKER.ID <<- paste0("worker_", id))
 
-########## PARALLELIZATION NOT YET TESTED!
-
+# in parallel, fit model to each dataset and write to separate csv file
 l_ply( dataset.paths, .parallel=T, function(.item, type, right.model.form.path, wrong.model.form.path, results.write.path, functions.path) {  
   # each element of dataset.paths is passed in parallel to function() as .item
   
@@ -81,4 +83,9 @@ l_ply( dataset.paths, .parallel=T, function(.item, type, right.model.form.path, 
 
 
 
+# stitch results files together
+source(functions.path)
+name.prefix = switch(type, "right"="right_results", "wrong"="wrong_results")  # needed below for stitch_files
 
+stitch_files(.results.singles.path = results.write.path, .results.stitched.write.path = results.write.path,
+                        .name.prefix = name.prefix, .stitch.file.name="stitched_model_fit_results.csv")
