@@ -1,42 +1,21 @@
 
-########################### LOAD COMMAND-LINE ARGUMENTS ###########################
+########################### FUNCTION: UPDATE NAME OF DATASET ###########################
 
-# load command line arguments
-#args = commandArgs(trailingOnly = TRUE)
-#print(args)
+# given a file path, extract the name of the dataset and update it
 
-# EDIT THIS :)
-# see below (function definition) for meaning of each
-# model.type = args[1]
-# data.path = args[2]
-
-# needed arguments:
-#  logical for are we doing right or wrong model?
-#  path to specific dataset (split data for right model; true data for wrong model)
-#  results.write.path: for model results
-# path to true betas so that we can compare the models
-
-# read in true data
-#d.true = read.csv(data.path)
-
-# from the dataset path, get vector of names of all the datasets
-#dataset.paths = 
-
-
-library(survival)
-
-
-# NOT TESTED - GULP!!
-# get model fit results for each dataset
-l_ply( dataset.paths, .parallel=T, function(.item, type, right.model.form.path, wrong.model.form.path, results.write.path, name.prefix) {  
-  # each element of dataset.names is passed in parallel to function() as .item
-
-  # write the appropriate line into its own file
-  fit_one_model( .dataset.path=.item, .type=type, .right.model.form.path=right.model.form.path,
-                 .wrong.model.form.path=wrong.model.form.path, .results.write.path=results.write.path, .name.prefix=name.prefix )
+update_name = function(.file.path, .name.prefix) {
+  # extract the part of the dataset name that starts with "dataset"
+  start = regexpr("dataset", .file.path, fixed=TRUE)
+  dataset.name = substr(.file.path, start=start, stop=nchar(.file.path) )
   
-}, type, right.model.form.path, wrong.model.form.path, results.write.path, name.prefix)
+  # add the name prefix
+  return( paste(.name.prefix, dataset.name, sep="_") )
+}
 
+# TEST - WORKS :)
+#file.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/split_dataset_1.csv"
+#name.prefix = "right_results"
+#update_name(file.path, name.prefix)
 
 
 ########################### FUNCTION: COLLAPSE "TRUE" DATA TO "OBSERVED" DATA ########################### 
@@ -61,8 +40,7 @@ collapse_data = function(data, id.var.name="id", event.var.name="d") {
 # .wrong.model.form.path: path to a text file holding formula for wrong model
 # .name.prefix
 
-fit_one_model = function( .dataset.path, .type, .right.model.form.path, .wrong.model.form.path, .results.write.path, .name.prefix ) {
-  
+fit_one_model = function( .dataset.path, .type, .right.model.form.path, .wrong.model.form.path, .results.write.path ) {
   # read in dataset
   # if fitting right model, assume the dataset path is already the split data that we're going to use
   # if fitting wrong model, assume the dataset path is the true data that must first be collapsed
@@ -88,32 +66,28 @@ fit_one_model = function( .dataset.path, .type, .right.model.form.path, .wrong.m
                   paste( names( CI.low ), "_lowCI", sep="" ),  paste( names( CI.high ), "_highCI", sep="" ),
                   "dataset" )
   
-  # write the row
-  file.name = .name.prefix  # EDIT THIS LATER 
+  # write the row and append descriptive name prefix
+  name.prefix = switch( .type, "right"="right_results", "wrong"="wrong_results")
+  file.name = update_name(.dataset.path, name.prefix)
   write.csv(row, paste(.results.write.path, file.name, sep="/") )
 }
 
 
-# LOCAL TEST - WORKS :)
-.dataset.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/SURV_2015-03-12_dataset.csv"
-.type = "wrong"
-.right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
-.wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
-.results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/results"
-.name.prefix = "test_row.csv"
+##### LOCAL TEST - WORKS :)
+#.dataset.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/SURV_2015-03-12_dataset_1.csv"
+#.type = "wrong"
+#.right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
+#.wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
+#.results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/results"
 
-.dataset.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/split_data.csv"
-.type = "right"
-.right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
-.wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
-.results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/results"
-.name.prefix = "test_row.csv"
+#.dataset.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/split_dataset_1.csv"
+#.type = "right"
+#.right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/right_model_formula.txt"
+#.wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/wrong_model_formula.txt"
+#.results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/2015-03-25_local_test/results"
 
-fit_one_model( .dataset.path, .type, .right.model.form.path, .wrong.model.form.path,
-                          .results.write.path, .name.prefix )
-
-
-
+#fit_one_model( .dataset.path, .type, .right.model.form.path, .wrong.model.form.path,
+#                          .results.write.path )
 
 
 
