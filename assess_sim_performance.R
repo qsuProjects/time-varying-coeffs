@@ -13,6 +13,6 @@ library(survival)
 
 ###################### SEE IF WE'RE HITTING INTENDED BETAS ###################### 
 
-rs1 = coxph( Surv(t0, t, d) ~ dose.X.t + cluster(id), data=d ); summary(rs1)
+rs1 = coxph( Surv(t0, t, d) ~ start.dose + dose.X.t + cluster(id), data=d ); summary(rs1)
 
 rs2 = coxph( Surv(t0, t, d) ~ start.dose + cluster(id), data=d ); summary(rs2)
