@@ -177,7 +177,7 @@ generateSbatch <- function(sbatch_params, runfile_path = NA, run_now = F) {
 
 
 # EDIT THIS LINE EACH TIME
-n.files = 5
+n.files = 1
 
 # EDIT THIS LINE EACH TIME
 path = "/share/PI/manishad/tvc/genCov"
@@ -192,7 +192,7 @@ runfile_path = paste(path, "/testRunFile.R", sep="")
 sbatch_params <- data.frame(jobname,
                     outfile,
                     errorfile,
-                    jobtime = "00:06:00",
+                    jobtime = "00:15:00",
                     quality = "normal",
                     node_number = 1,
                     mem_per_node = 16000,
@@ -201,7 +201,7 @@ sbatch_params <- data.frame(jobname,
                     tasks_per_node = 1,
                     cpus_per_task = 1,
                     path_to_r_script = paste(path, "/r/simulate.R", sep=""),
-                    args_to_r_script = paste( "--args 1000 /share/PI/manishad/tvc/genCov/dose_parameters.csv 20 1 ", jobname,
+                    args_to_r_script = paste( "--args 1000 /share/PI/manishad/tvc/genCov/dose_parameters.csv 300 NA ", jobname,
                                               " /share/PI/manishad/tvc/genCov/output/generated_data", sep="" ) ,
                     write_path,
                     stringsAsFactors = F,

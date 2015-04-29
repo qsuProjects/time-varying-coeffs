@@ -1,7 +1,7 @@
 #!/bin/bash
 #################
-#set partition 
-#SBATCH -p manishad
+#set partition (ADD SBATCH IN FRONT TO ACTIVATE! OTHERWISE JUST NORMAL PARTITION)
+#-p manishad
 #set a job name  
 #SBATCH --job-name=gs0001
 #################  
@@ -49,6 +49,6 @@ ml load R
 # arg 9: log write directory
 # arg 10: data write directory
 
-srun R -f /share/PI/manishad/tvc/genSurv/r/gSurvMain.R --args /share/PI/manishad/tvc/genSurv/r/generateTimeAndFit.R /share/PI/manishad/tvc/genSurv/r/betas.R /share/PI/manishad/tvc/genSurv/input_data 8 50 1 /scratch/PI/manishad/tvc/genSurv/output/modelFit survtime.csv /share/PI/manishad/tvc/genSurv/output/log/ /share/PI/manishad/tvc/genSurv/output/generated_data/
+srun R -f /share/PI/manishad/tvc/genSurv/r/gSurvMain.R --args /share/PI/manishad/tvc/genSurv/r/generateTimeAndFit.R /share/PI/manishad/tvc/genSurv/r/betas.R /share/PI/manishad/tvc/genCov/output/generated_data 8 50 1 /share/PI/manishad/tvc/genSurv/output/modelFit survtime.csv /share/PI/manishad/tvc/genSurv/output/log/ /share/PI/manishad/tvc/genSurv/output/generated_data/
 
 
