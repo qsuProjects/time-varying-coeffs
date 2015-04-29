@@ -12,6 +12,11 @@ system( "scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-co
 # look at genCov sbatches
 # cd /share/PI/manishad/tvc/genCov/sbatch
 
+# clear folder results
+# rm output/generated_data/*
+# rm sbatch/rm*
+  
+
 
 ######### GENSURV ######### 
 
@@ -32,3 +37,14 @@ system( "scp -r ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-co
 
 # copy completed dataset back to local machine
 system( "scp mmathur@sherlock:/share/PI/manishad/tvc/genSurv/output/generated_data/* ~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data " )
+
+# copy all output back to local machine
+system( "scp -r mmathur@sherlock:/share/PI/manishad/tvc/genSurv/output/* ~/Desktop " )
+
+# clear folder results
+rm output/egs*
+rm output/ogs*
+rm output/generated_data/*
+rm output/log/*
+rm output/modelFit/*
+rm output/surv*

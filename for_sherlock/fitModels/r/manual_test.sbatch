@@ -40,5 +40,13 @@
 
 ml load R
 
-# arguments: number of  workers, job title prefix, n, obs, n.Reps, n.Drugs
-srun R -f /share/PI/manishad/genCov/simulate.R --args 1 job_1 2000 200 1 15
+# arguments:
+# 1. number of clusters
+# 2. model type (right or wrong)
+# 3. right model formula path
+# 4. wrong model formula path
+# 5. results write path
+# 6. R functions path
+# 7. path to data folder
+
+srun R -f /share/PI/manishad/tvc/fitModels/parallelized_wrapper.R --args PUT ARGS IN!
