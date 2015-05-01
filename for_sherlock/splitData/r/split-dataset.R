@@ -1,12 +1,36 @@
 
 ########################### LOAD COMMAND-LINE ARGUMENTS ###########################
 
+# load command line arguments
+args = commandArgs(trailingOnly = TRUE)
+print(args)
+
+# see below (function defintion) for meaning of each
+true.data.path = args[1]
+write.path.collapsed = args[2]
+write.path.split = args[3]
+name.prefix = args[4]
+
+
+
+#### FOR LOCAL TEST ONLY :) ####
+#true.data.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/SURV_2015-04-29_job_1_covariates.csv"
+#write.path.collapsed = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
+#write.path.split = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
+#name.prefix = "name.prefix"
+################################
+
+# read in true data
+td = read.csv(true.data.path)
+  
+  
 
 ########################### FUNCTION: SPLIT DATASET ON FOLLOW-UP TIMES ########################### 
 
 ##### Split a dataframe of survival times by event or follow-up times. #####
 # assumes there is only one row per subject
-# returns a dataset with all the original variables plus start.time and stop.time.
+# returns a list with two elements: split.data (dataset with all the original variables)
+#  and split.times (a vector of the times at which data were split)
 
 # d = data frame
 # id.var = name of id variable
@@ -15,7 +39,11 @@
 # split.at = "followup" to split at followup times or "event" to split at event times 
 # na.rm = remove subjects with missing followup or event variables?
 
-event_split = function(d, id.var, followup.var, event.var, split.at, na.rm=TRUE) {
+event_split = function(d, id.var, followup.var, event.var, split.at, na.rm=TRUE,
+                       name.prefix="", write.path) {
+  
+  # DEBUGGING
+  write.csv(head(d), paste(write.path, "/d.csv", sep="") )
   
   # remove NAs in followup and event variables if specified
   # droplevels to get rid of unused levels in subsetted data
@@ -35,17 +63,26 @@ event_split = function(d, id.var, followup.var, event.var, split.at, na.rm=TRUE)
   d1 = lapply(split.data, function(x) expand_subject(x, time.vec, id.var, followup.var, event.var, split.at) )
   d2 = do.call( "rbind", lapply( d1, function(x) data.frame( as.list(x) ) ) )
   
+  
+  # write data file and splitting times
+  if (!is.na(write.path)) {
+    string1 = paste(Sys.Date(), name.prefix, "split_data.csv", sep="_")
+    write.csv(d2, paste(write.path, string1, sep="/"))
+    
+    string2 = paste(Sys.Date(), name.prefix, "split_times.csv", sep="_")
+    write.csv(time.vec, paste(write.path, string2, sep="/"))
+  }
+  
   return( list(split.data=d2, split.times=time.vec) ) 
 }
 
 
 
+########################### FUNCTION: EXPAND SINGLE ROW ON SPLIT TIMES ########################### 
+
 ###### Function (internal): Given a row from dataframe, expand it on provided splitting times. #####
 
 expand_subject = function(subject, time.vec, id.var, followup.var, event.var, split.at) {
-  
-  #browser()
-  
   followup = subject[[followup.var]]
   time.vec.2 = time.vec[time.vec <= followup]  # remove any times that are after the subject's followup
   if (split.at == "event") time.vec.2 = unique( c(time.vec.2, followup) )  # if subject had event, add a final record ending at the end of their followup time
@@ -74,15 +111,38 @@ expand_subject = function(subject, time.vec, id.var, followup.var, event.var, sp
 }
 
 
+########################### FUNCTION: COLLAPSE "TRUE" DATA TO "OBSERVED" DATA ########################### 
+
+# LOCAL TEST - WORKS :)
+#data = read.csv("~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/SURV_2015-03-12_dataset.csv")
+
+# keep only rows with event
+collapse_data = function(data, id.var.name="id", event.var.name="d", name.prefix="", write.path=NA) {
+  d2 = data[ data[[event.var.name]] == 1, ]
+  
+  # write data file
+  if (!is.na(write.path)) {
+    string = paste(Sys.Date(), name.prefix, "collapsed_data.csv", sep="_")
+    write.csv(d2, paste(write.path, string, sep="/"))
+  }
+  return(d2)
+}
+
+
+########################### RUN ########################### 
+
+# make collapsed data
+c = collapse_data(data=td, id.var.name="id", event.var.name="d",
+              name.prefix=name.prefix, write.path=write.path.collapsed)
+
+# make split data
+event_split(d=c, id.var="id", followup.var="t", event.var="d", split.at="followup", 
+            name.prefix=name.prefix, write.path=write.path.split)
+
+
+
 # toy example
 #( fake = data.frame( id=c(1,2,3), dosage=c(50,25,100), followup=c(2,4,1), event=c(1,0,1)) )
 #( split = event_split(d=fake, id.var="id", followup.var="followup", event.var="event", split.at="followup", na.rm=TRUE) )
 #split$cumulative.dosage = split$dosage * split$stop.time
-
-# LOCAL TEST
-d = read.csv("~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/collapsed_data.csv")
-split = event_split(d=d, id.var="id", followup.var="t", event.var="d", split.at="followup")
-d.split = split$split.data
-write.csv(d.split, "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/split_data.csv")
-write(split$split.times, "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/split_times.txt")
 

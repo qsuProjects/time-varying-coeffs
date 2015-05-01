@@ -12,7 +12,7 @@
 #SBATCH --error=egs0001.err
 #################
 #time you think you need; default is one hour
-#SBATCH --time=00:10:00
+#SBATCH --time=00:20:00
 #################
 #quality of service; think of it as job priority
 #SBATCH --qos=normal
@@ -49,6 +49,6 @@ ml load R
 # arg 9: log write directory
 # arg 10: data write directory
 
-srun R -f /share/PI/manishad/tvc/genSurv/r/gSurvMain.R --args /share/PI/manishad/tvc/genSurv/r/generateTimeAndFit.R /share/PI/manishad/tvc/genSurv/r/betas.R /share/PI/manishad/tvc/genCov/output/generated_data 8 50 1 /share/PI/manishad/tvc/genSurv/output/modelFit survtime.csv /share/PI/manishad/tvc/genSurv/output/log/ /share/PI/manishad/tvc/genSurv/output/generated_data/
+srun R -f /share/PI/manishad/tvc/genSurv/r/gSurvMain.R --args /share/PI/manishad/tvc/genSurv/r/generateTimeAndFit.R /share/PI/manishad/tvc/genSurv/r/betas.R /share/PI/manishad/tvc/genCov/output/generated_data 1 50 1 /share/PI/manishad/tvc/genSurv/output/modelFit survtime.csv /share/PI/manishad/tvc/genSurv/output/log/ /share/PI/manishad/tvc/genSurv/output/generated_data/
 
 
