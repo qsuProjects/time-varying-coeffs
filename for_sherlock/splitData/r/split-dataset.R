@@ -1,6 +1,4 @@
 
-# TEST: 10:59
-
 ########################### LOAD COMMAND-LINE ARGUMENTS ###########################
 
 # load command line arguments
@@ -20,10 +18,19 @@ true.data.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-
 write.path.collapsed = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
 write.path.split = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
 name.prefix = "name.prefix"
+
+true.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/true_model_formula.txt"
+right.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/right_model_formula.txt"
+wrong.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/wrong_model_formula.txt"
+noninteractive.model.form.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/noninteractive_model_formula.txt"
+
+results.write.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/output"
 ################################
 
 # read in true data
 td = read.csv(true.data.path)
+
+library(survival)
   
 
 ########################### FUNCTION: SPLIT DATASET ON FOLLOW-UP TIMES ########################### 
@@ -126,43 +133,81 @@ collapse_data = function(data, id.var.name="id", event.var.name="d", name.prefix
   return(d2)
 }
 
+########################### FUNCTION: UPDATE NAME OF DATASET ###########################
+
+# given a file path, extract the name of the dataset and update it
+
+update_name = function(.file.path, .name.prefix) {
+  # extract the part of the dataset name that starts with "dataset"
+  start = regexpr("dataset", .file.path, fixed=TRUE)
+  dataset.name = substr(.file.path, start=start, stop=nchar(.file.path) )
+  
+  # add the name prefix
+  return( paste(.name.prefix, dataset.name, sep="_") )
+}
+
+# TEST - WORKS :)
+file.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/test_data/split_dataset_1.csv"
+name.prefix = "right_results"
+update_name(file.path, name.prefix)
+
+
 
 ########################### FUNCTION: FIT MODEL ###########################
 
 # given a dataset, fit the specified model (right or wrong) and write results to a single csv file
 
-# .data: dataset
+# .data: dataset name (e.g., "dataset_1")
 # .type: "right", "wrong", or "true" model
 # .right.model.form.path: path to a text file holding formula for right model
 # .wrong.model.form.path: path to a text file holding formula for wrong model
 # .name.prefix
 
-fit_one_model = function( .data, .data.name, .type, .right.model.form.path, .wrong.model.form.path, .results.write.path ) {
+fit_one_model = function( .data, .data.name, .type, .noninteractive.model.form.path, .true.model.form.path,
+                          .right.model.form.path, .wrong.model.form.path, .results.write.path ) {
 
-  browser()
-  
   # based on the arguments, read in the Cox formula
-  formula = readLines( switch( .type, c("right","true")=.right.model.form.path, "wrong"=.wrong.model.form.path ) )
+  form = readLines( switch( .type, "noninteractive"=.noninteractive.model.form.path,
+                            "right"=.right.model.form.path,
+                            "true"=.true.model.form.path,
+                            "wrong"=.wrong.model.form.path ) )
   
   # fit model
-  rs = coxph( eval( parse(text=formula) ), data=.data )
+  rs = coxph( eval( parse(text=form) ), data=.data )
   coef = rs$coefficients
-  CI.low = summary(rs)$conf.int[,3]
-  CI.high = summary(rs)$conf.int[,4]
+  CI.low = confint(rs)[,1]
+  CI.high = confint(rs)[,2]
+  #CI.low = summary(rs)$conf.int[,3]
+  #CI.high = summary(rs)$conf.int[,4]
+
+  # PH violation
+  PH = cox.zph(rs, transform="log")$table
+  PH.dose.p = PH["start.dose","p"]
+  
+  if (nrow(PH) > 1) {  # if there's only 1 coefficient, it doesn't report a global p-value, so just report dose p again
+    PH.global.p = PH["GLOBAL","p"]
+  } else {
+    PH.global.p = PH.dose.p
+  }
+  
+  
+  #browser()
   
   # return the row for the model results
-  vec = c( as.character(Sys.Date()), .type, coef, CI.low, CI.high, .data.name )
+  vec = c( as.character(Sys.Date()), as.character(.type), coef, CI.low, CI.high, PH.global.p, PH.dose.p, .data.name, form )
   row = data.frame( matrix(nrow=1, ncol=length(vec)) )
   row[1,] = vec
-  
+ 
   # improve names of row
-  names(row) = c( "date.completed", paste( names( coef ), "_coef", sep="" ), "model",
-                  paste( names( CI.low ), "_lowCI", sep="" ),  paste( names( CI.high ), "_highCI", sep="" ),
-                  "dataset" )
+  names(row) = c( "date.completed", "model", paste( names( coef ), "_coef", sep="" ),
+                  paste( names( coef ), "_lowCI", sep="" ),  paste( names( coef ), "_highCI", sep="" ),
+                  "PH.global.p", "PH.dose.p",
+                  "dataset", "form" )
   
   # write the row and append descriptive name prefix
-  name.prefix = switch( .type, "right"="right_results", "wrong"="wrong_results")
-  file.name = update_name(.dataset.path, name.prefix)
+  #type.name = switch( .type, "true"="true_results", "right"="right_results", "wrong"="wrong_results")
+  type.name = paste( .type, "_results", sep="" )
+  file.name = paste(.data.name, "_", type.name, ".csv", sep="")
   write.csv(row, paste(.results.write.path, file.name, sep="/") )
 }
 
@@ -170,18 +215,37 @@ fit_one_model = function( .data, .data.name, .type, .right.model.form.path, .wro
 ########################### RUN ########################### 
 
 # make collapsed data
-c = collapse_data(data=td, id.var.name="id", event.var.name="d",
+cd = collapse_data(data=td, id.var.name="id", event.var.name="d",
               name.prefix=name.prefix, write.path=write.path.collapsed)
 
 # make split data
-event_split(d=c, id.var="id", followup.var="t", event.var="d", split.at="followup", 
-            name.prefix=name.prefix, write.path=write.path.split)
+sd = event_split(d=cd, id.var="id", followup.var="t", event.var="d", split.at="followup", 
+            name.prefix=name.prefix, write.path=write.path.split)$split.data
 
-# fit model
-fit_model( .data=td, .data.name="data.name", .type="true", .right.model.form.path,
-           .wrong.model.form.path, .results.write.path ) {
+# fit true model
+fit_one_model( .data=td, .data.name="data.name", .type="true", .noninteractive.model.form.path=noninteractive.model.form.path,
+               .true.model.form.path=true.model.form.path,
+                 .right.model.form.path=right.model.form.path,
+           .wrong.model.form.path=wrong.model.form.path, .results.write.path=results.write.path )
 
-# BOOKMARK: WAS WORKING ON THIS ^
+# fit right model
+fit_one_model( .data=sd, .data.name="data.name", .type="right", .noninteractive.model.form.path=noninteractive.model.form.path,
+               .true.model.form.path=true.model.form.path,
+               .right.model.form.path=right.model.form.path,
+               .wrong.model.form.path=wrong.model.form.path, .results.write.path=results.write.path )
+
+# fit wrong model
+fit_one_model( .data=cd, .data.name="data.name", .type="wrong", .noninteractive.model.form.path=noninteractive.model.form.path,
+               .true.model.form.path=true.model.form.path,
+               .right.model.form.path=right.model.form.path,
+               .wrong.model.form.path=wrong.model.form.path, .results.write.path=results.write.path )
+
+
+# fit noninteractive model
+fit_one_model( .data=cd, .data.name="data.name", .type="noninteractive", .noninteractive.model.form.path=noninteractive.model.form.path,
+               .true.model.form.path=true.model.form.path,
+               .right.model.form.path=right.model.form.path,
+               .wrong.model.form.path=wrong.model.form.path, .results.write.path=results.write.path )
 
 
 
