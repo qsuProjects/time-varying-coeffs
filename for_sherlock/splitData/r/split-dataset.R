@@ -1,4 +1,6 @@
 
+# TEST: 10:59
+
 ########################### LOAD COMMAND-LINE ARGUMENTS ###########################
 
 # load command line arguments
@@ -14,15 +16,14 @@ name.prefix = args[4]
 
 
 #### FOR LOCAL TEST ONLY :) ####
-#true.data.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/SURV_2015-04-29_job_1_covariates.csv"
-#write.path.collapsed = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
-#write.path.split = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
-#name.prefix = "name.prefix"
+true.data.path = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test/SURV_2015-04-29_job_1_covariates.csv"
+write.path.collapsed = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
+write.path.split = "~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/for_sherlock/splitData/local-test"
+name.prefix = "name.prefix"
 ################################
 
 # read in true data
 td = read.csv(true.data.path)
-  
   
 
 ########################### FUNCTION: SPLIT DATASET ON FOLLOW-UP TIMES ########################### 
@@ -41,9 +42,6 @@ td = read.csv(true.data.path)
 
 event_split = function(d, id.var, followup.var, event.var, split.at, na.rm=TRUE,
                        name.prefix="", write.path) {
-  
-  # DEBUGGING
-  write.csv(head(d), paste(write.path, "/d.csv", sep="") )
   
   # remove NAs in followup and event variables if specified
   # droplevels to get rid of unused levels in subsetted data
@@ -129,6 +127,46 @@ collapse_data = function(data, id.var.name="id", event.var.name="d", name.prefix
 }
 
 
+########################### FUNCTION: FIT MODEL ###########################
+
+# given a dataset, fit the specified model (right or wrong) and write results to a single csv file
+
+# .data: dataset
+# .type: "right", "wrong", or "true" model
+# .right.model.form.path: path to a text file holding formula for right model
+# .wrong.model.form.path: path to a text file holding formula for wrong model
+# .name.prefix
+
+fit_one_model = function( .data, .data.name, .type, .right.model.form.path, .wrong.model.form.path, .results.write.path ) {
+
+  browser()
+  
+  # based on the arguments, read in the Cox formula
+  formula = readLines( switch( .type, c("right","true")=.right.model.form.path, "wrong"=.wrong.model.form.path ) )
+  
+  # fit model
+  rs = coxph( eval( parse(text=formula) ), data=.data )
+  coef = rs$coefficients
+  CI.low = summary(rs)$conf.int[,3]
+  CI.high = summary(rs)$conf.int[,4]
+  
+  # return the row for the model results
+  vec = c( as.character(Sys.Date()), .type, coef, CI.low, CI.high, .data.name )
+  row = data.frame( matrix(nrow=1, ncol=length(vec)) )
+  row[1,] = vec
+  
+  # improve names of row
+  names(row) = c( "date.completed", paste( names( coef ), "_coef", sep="" ), "model",
+                  paste( names( CI.low ), "_lowCI", sep="" ),  paste( names( CI.high ), "_highCI", sep="" ),
+                  "dataset" )
+  
+  # write the row and append descriptive name prefix
+  name.prefix = switch( .type, "right"="right_results", "wrong"="wrong_results")
+  file.name = update_name(.dataset.path, name.prefix)
+  write.csv(row, paste(.results.write.path, file.name, sep="/") )
+}
+
+
 ########################### RUN ########################### 
 
 # make collapsed data
@@ -139,10 +177,11 @@ c = collapse_data(data=td, id.var.name="id", event.var.name="d",
 event_split(d=c, id.var="id", followup.var="t", event.var="d", split.at="followup", 
             name.prefix=name.prefix, write.path=write.path.split)
 
+# fit model
+fit_model( .data=td, .data.name="data.name", .type="true", .right.model.form.path,
+           .wrong.model.form.path, .results.write.path ) {
+
+# BOOKMARK: WAS WORKING ON THIS ^
 
 
-# toy example
-#( fake = data.frame( id=c(1,2,3), dosage=c(50,25,100), followup=c(2,4,1), event=c(1,0,1)) )
-#( split = event_split(d=fake, id.var="id", followup.var="followup", event.var="event", split.at="followup", na.rm=TRUE) )
-#split$cumulative.dosage = split$dosage * split$stop.time
 
