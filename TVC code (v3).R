@@ -6,6 +6,7 @@
 
 library(ggplot2)
 library(survival)
+#library(pspline)
 
 
 ########################### FUNCTION: SIMULATE DATA ########################### 
@@ -65,6 +66,10 @@ fit_models = function(d, lower.bound, upper.bound, scenario) {
   # right interaction
   rs.r <<- coxph(Surv(surv.time) ~ start.dose + tt(start.dose), data=d,
                tt = function(x, t, ...) x * log(t) )
+  
+  # spline interaction
+  rs.s <<- coxph(Surv(surv.time) ~ start.dose + tt(start.dose), data=d,
+                 tt = function(x, t, ...) x * pspline(t) )
 
   # integrate difference from true model
   new.row = scenario  # for starters, the row just says what scenario it is
@@ -133,7 +138,7 @@ B = as.data.frame( matrix(nrow=1, ncol=4) )
 names(B) = c("scenario", "int.n", "int.r", "int.w")
 
 for (i in 1:reps) {
-  d = sim_one_dataset(scenario="C", n, doses, doses.p)
+  d = sim_one_dataset(scenario="B", n, doses, doses.p)
   B = rbind(B, fit_models(d, lower.bound=bounds.B[1], upper.bound=bounds.B[2], scenario="B") )
 }
 
@@ -172,6 +177,75 @@ rs$scenario = rep( c("Decreasing HR", "Increasing HR"), each=3)
 # write dataset
 setwd("~/Dropbox/QSU/Mathur/MY_PAPERS/TVC/Code/git_repo/time-varying-coeffs/Sim results")
 write.csv(rs, paste(Sys.Date(), "tvc_sim_results.csv", sep="_") )
+
+
+
+
+########################### EXPERIMENT WITH PLOTTING SPLINE RESULTS ###########################
+
+
+d = sim_one_dataset(scenario="C", n, doses, doses.p)
+fit_models(d, lower.bound=bounds.C[1], upper.bound=bounds.C[2], scenario="C")
+
+# spline coefficients
+# remove the fixed one for start.dos
+t.coef = rs.s$coefficients[-1]
+
+# where are the knots?
+degree=3  # by default of the pspline function
+nterm = round(2.5 * df)
+x = unique(d$surv.time)  # time variable that is getting the spline
+dx = (max(x) - min(x))/ nterm
+knots <- c(min(x) + dx * ((-degree):(nterm - 1)), 
+           max(x) + dx * (0:degree))
+
+
+pspline(x)
+cbase = c(1.48140398037905, 
+                  2.9551507494113, 4.42889751844354, 5.90264428747579, 7.37639105650804, 
+                  8.85013782554029, 10.3238845945725, 11.7976313636048, 13.271378132637, 
+                  14.7451249016693, 16.2188716707015, 17.6926184397338)
+
+
+# what are the unique survival times?
+# everyone has unique survival time
+times = sort(unique(d$surv.time))
+
+
+# http://stackoverflow.com/questions/16088283/adding-pspline-term-to-coxph-model-changes-summary-table-in-r
+
+# terms of linear predictor
+preds <- predict(rs.s, type='terms', se=TRUE)$fit
+preds$time = tt(start.dose)
+
+
+# maybe we should use this?
+rs.s$coefficients
+# need to find out what time each knot corresponds to
+
+
+# possibly useful things
+# I think the things in cbase are where the spline knots are (survival times)
+# because the length and some of the times are actual survival times
+# in the dataset.
+rs.s$printfun
+
+# investigate what these are
+rs.s$coxlist2
+rs.s$means
+
+
+linpred = sort( unique( rs.s$linear.predictors ) )
+plot(exp(linpred))
+
+# from Terry Therneau's example
+matplot(na.omit(cancer)$age, exp(cbind( temp$fit[, 3], 
+                                        temp$fit[,3] - 2* temp$se.fit[,3], 
+                                        temp$fit[,3] + 2* temp$se.fit[,3])), 
+        
+        log='y', xlab="Age", ylab="Estimated Relative Risk", col=c('red',"blue","blue") )
+
+
 
 
 
